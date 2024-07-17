@@ -11,9 +11,9 @@ class StimulusImplicitUsagesProvider : ImplicitUsageProvider {
     override fun isImplicitUsage(element: PsiElement): Boolean {
         if (element is ES6ExportDefaultAssignment) {
             val namedElement = element.namedElement
-            return namedElement is JSClass && namedElement.extendsList != null 
+            return namedElement is JSClass && namedElement.extendsList != null
         }
-        
+
         if (element !is JSField || element.jsContext != JSContext.STATIC) return false
         val name = element.name
         return "targets" == name || "values" == name || "classes" == name || "outlets" == name

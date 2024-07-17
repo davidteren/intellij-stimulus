@@ -51,7 +51,6 @@ private class ActionReferenceProvider : PsiReferenceProvider() {
             return@multiValueAttributeReferenceMapper listOf(parentRef, methodRef)
         }
     }
-
 }
 
 private class ControllerReferenceProvider : PsiReferenceProvider() {
@@ -80,4 +79,4 @@ fun multiValueAttributeReferenceMapper(
         }
         .flatten()
         .toTypedArray()
-} 
+}

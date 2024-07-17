@@ -1,13 +1,16 @@
 package stimulus
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 
 @Suppress("JUnitMixedFramework")
 class ControllerTest : StimulusTestBase() {
 
     private fun addSimpleController(name: String) {
         myFixture.addFileToProject(
-            "controllers/$name", """
+            "controllers/$name",
+            """
                 import { Controller } from '@hotwired/stimulus'
                 import { useHotkeys } from 'stimulus-use'
                 export default class extends Controller {

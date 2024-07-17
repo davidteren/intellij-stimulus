@@ -62,7 +62,6 @@ private fun trimControllerPostfix(file: PsiFile): String {
     return StringUtil.trimEnd(name, "-controller")
 }
 
-
 fun getContextControllers(contextTag: XmlTag): List<Pair<XmlTag, JSClass>> {
     return generateSequence(contextTag) { it.parentTag }.mapNotNull { tag ->
         val attribute = tag.getAttribute(dataControllerName) ?: return@mapNotNull null
@@ -110,17 +109,16 @@ private fun getAllControllers(context: PsiElement): List<JSFile> {
         override fun contains(file: VirtualFile): Boolean {
             val nameSequence = file.nameSequence
             return super.contains(file) &&
-                    (nameSequence.endsWith("_controller.js") || nameSequence.endsWith("-controller.js"))
+                (nameSequence.endsWith("_controller.js") || nameSequence.endsWith("-controller.js"))
         }
     }
     return getAllControllers(JavaScriptFileType.INSTANCE, context.manager, scope) +
-            getAllControllers(TypeScriptFileType.INSTANCE, context.manager, scope)
+        getAllControllers(TypeScriptFileType.INSTANCE, context.manager, scope)
 }
 
 private fun getAllControllers(fileType: FileType, manager: PsiManager, scope: GlobalSearchScope) =
     FileTypeIndex.getFiles(fileType, scope)
         .mapNotNull { manager.findFile(it) as? JSFile }
-
 
 class StimulusControllerReference(private val name: String, psiElement: PsiElement, range: TextRange) :
     PsiReferenceBase<PsiElement>(psiElement, range, true) {
@@ -132,7 +130,6 @@ class StimulusControllerReference(private val name: String, psiElement: PsiEleme
             .map { toControllerName(it) }
             .map { LookupElementBuilder.create(it) }
             .toTypedArray()
-
 }
 
 class StimulusMethodReference(
