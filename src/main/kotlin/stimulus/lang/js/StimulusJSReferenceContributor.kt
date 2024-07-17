@@ -47,9 +47,10 @@ class StimulusJSReferenceContributor : PsiReferenceContributor() {
 
 fun getOwnerClass(element: PsiElement): JSClass? {
     val scope = PsiTreeUtil.findFirstContext(element, true) {
-        return@findFirstContext (it is JSExecutionScope &&
+        return@findFirstContext (
+            it is JSExecutionScope &&
                 (it !is JSFunction || !JSPsiImplUtils.isArrowFunction(it))
-                )
+            )
     } ?: return null
     return JSUtils.getMemberContainingClass(scope)
 }
@@ -113,16 +114,18 @@ class StimulusClassFieldReference(private val refExpression: JSReferenceExpressi
         if (!name.endsWith(suffix) && !name.endsWith(StringUtil.pluralize(suffix))) return null
         val propName = getSimplePropertyName(name, suffix)
         if (null != getLiteralValues(field).firstOrNull { it == propName }) {
-            //to force empty type
+            // to force empty type
             return JSLocalImplicitElementImpl(name, null, field, JSImplicitElement.Type.Property)
         }
         return null
     }
 
     private fun getSimplePropertyName(name: String, suffix: String): String {
-        val withoutSuffix = if (name.endsWith(suffix))
+        val withoutSuffix = if (name.endsWith(suffix)) {
             name.substring(0, name.length - suffix.length)
-        else name.substring(0, name.length - StringUtil.pluralize(suffix).length)
+        } else {
+            name.substring(0, name.length - StringUtil.pluralize(suffix).length)
+        }
         if (withoutSuffix.startsWith("has")) {
             return StringUtil.decapitalize(withoutSuffix.substring("has".length))
         }
@@ -140,24 +143,32 @@ class StimulusCompletionContributor : CompletionContributor() {
         val parent = parameters.position.parent
         if (parent is JSReferenceExpression && parent.qualifier is JSThisExpression) {
             val jsClass = getOwnerClass(parent) ?: return
-            result.addAllElements(getLiteralValues(jsClass.findFieldByName(targetsField)).map {
-                LookupElementBuilder.create(it + targetPropertySuffix)
-            })
-            result.addAllElements(getLiteralValues(jsClass.findFieldByName(classesField)).map {
-                LookupElementBuilder.create(it + classPropertySuffix)
-            })
-            result.addAllElements(getLiteralValues(jsClass.findFieldByName(outletsField)).map {
-                LookupElementBuilder.create(JSStringUtil.toCamelCase(it) + outletPropertySuffix)
-            })
-            result.addAllElements((jsClass.findFieldByName(valuesField)
-                ?.initializer as? JSObjectLiteralExpression)
-                ?.properties
-                ?.mapNotNull { it.name }
-                ?.map {
-                    LookupElementBuilder.create(it + valuePropertySuffix)
-                } ?: emptyList())
-
+            result.addAllElements(
+                getLiteralValues(jsClass.findFieldByName(targetsField)).map {
+                    LookupElementBuilder.create(it + targetPropertySuffix)
+                }
+            )
+            result.addAllElements(
+                getLiteralValues(jsClass.findFieldByName(classesField)).map {
+                    LookupElementBuilder.create(it + classPropertySuffix)
+                }
+            )
+            result.addAllElements(
+                getLiteralValues(jsClass.findFieldByName(outletsField)).map {
+                    LookupElementBuilder.create(JSStringUtil.toCamelCase(it) + outletPropertySuffix)
+                }
+            )
+            result.addAllElements(
+                (
+                    jsClass.findFieldByName(valuesField)
+                        ?.initializer as? JSObjectLiteralExpression
+                    )
+                    ?.properties
+                    ?.mapNotNull { it.name }
+                    ?.map {
+                        LookupElementBuilder.create(it + valuePropertySuffix)
+                    } ?: emptyList()
+            )
         }
-
     }
 }

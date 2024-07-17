@@ -11,9 +11,9 @@ import com.intellij.xml.XmlAttributeDescriptorsProvider
 import com.intellij.xml.impl.BasicXmlAttributeDescriptor
 import com.intellij.xml.impl.schema.AnyXmlAttributeDescriptor
 import stimulus.lang.js.classesField
+import stimulus.lang.js.outletsField
 import stimulus.lang.js.targetsField
 import stimulus.lang.js.valuesField
-import stimulus.lang.js.outletsField
 
 fun getLiteralValues(field: JSField?) = (field?.initializer as? JSArrayLiteralExpression)
     ?.expressions?.mapNotNull { it as? JSLiteralExpression }
@@ -27,11 +27,11 @@ class StimulusAttributeDescriptorsProvider : XmlAttributeDescriptorsProvider {
         if (controllers.isEmpty()) return getControllerAttributeDescriptors()
 
         return getControllerAttributeDescriptors() +
-                getActionsAttributeDescriptors() +
-                getTargetDescriptors(controllers) +
-                getValuesDescriptors(controllers) +
-                getClassesDescriptors(context, controllers) +
-                getOuletsDescriptors(context, controllers)
+            getActionsAttributeDescriptors() +
+            getTargetDescriptors(controllers) +
+            getValuesDescriptors(controllers) +
+            getClassesDescriptors(context, controllers) +
+            getOuletsDescriptors(context, controllers)
     }
 
     override fun getAttributeDescriptor(attributeName: String, context: XmlTag): XmlAttributeDescriptor? {
@@ -47,9 +47,11 @@ class StimulusAttributeDescriptorsProvider : XmlAttributeDescriptorsProvider {
     private fun getTargetDescriptors(controllers: List<Pair<XmlTag, JSClass>>): Array<XmlAttributeDescriptor> {
         return controllers.mapNotNull { (_, controller) ->
             val targetsField = controller.findFieldByName(targetsField)
-            return@mapNotNull if (targetsField != null && targetsField.jsContext == JSContext.STATIC)
+            return@mapNotNull if (targetsField != null && targetsField.jsContext == JSContext.STATIC) {
                 TargetsFieldAttributeDescriptor(targetsField)
-            else null
+            } else {
+                null
+            }
         }.toTypedArray()
     }
 
@@ -81,8 +83,8 @@ class StimulusAttributeDescriptorsProvider : XmlAttributeDescriptorsProvider {
         return controllers.filter { (tag, _) -> tag == context }.mapNotNull { (_, controller) ->
             val outletsField = controller.findFieldByName(outletsField)
             return@mapNotNull (outletsField?.initializer as? JSArrayLiteralExpression)
-                    ?.expressions?.mapNotNull { it as? JSLiteralExpression }
-                    ?.map { OutletsFieldAttributeDescriptor(it) }
+                ?.expressions?.mapNotNull { it as? JSLiteralExpression }
+                ?.map { OutletsFieldAttributeDescriptor(it) }
         }.flatten().toTypedArray()
     }
 }
@@ -101,12 +103,16 @@ class ClassesFieldAttributeDescriptor(private val expression: JSLiteralExpressio
 
 class ValuesFieldAttributeDescriptor(private val property: JSProperty) : BaseStimulusAttributeDescriptor() {
     override fun getDeclaration(): PsiElement = property
-    override fun getName(): String = "data-${toControllerName(property.containingFile)}-${JSStringUtil.toKebabCase(property.name)}-value"
+    override fun getName(): String = "data-${toControllerName(
+        property.containingFile
+    )}-${JSStringUtil.toKebabCase(property.name)}-value"
 }
 
 class OutletsFieldAttributeDescriptor(private val expression: JSLiteralExpression) : BaseStimulusAttributeDescriptor() {
     override fun getDeclaration(): PsiElement = expression
-    override fun getName(): String = "data-${toControllerName(expression.containingFile)}-${expression.stringValue}-outlet"
+    override fun getName(): String = "data-${toControllerName(
+        expression.containingFile
+    )}-${expression.stringValue}-outlet"
 }
 
 abstract class BaseStimulusAttributeDescriptor : BasicXmlAttributeDescriptor() {
